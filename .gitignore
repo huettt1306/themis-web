@@ -11,6 +11,7 @@ instance/
 venv/
 .env.*
 tmp_upload/
+users.csv
 
 # Logs
 *.log
@@ -37,6 +38,7 @@ Thumbs.db
 OSD/
 contestants/
 problems/
+downloads/
 
 # --- Build / cache ---
 *.cache

@@ -1,9 +1,16 @@
 <template>
-  <div id="app">
-    <SubmitForm />
-  </div>
+  <router-view />
 </template>
 
 <script setup>
-import SubmitForm from './components/SubmitForm.vue'
+// Không cần code gì khác
 </script>
+
+<style>
+html, body, #app {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: Arial, sans-serif;
+}
+</style>
