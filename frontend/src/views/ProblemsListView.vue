@@ -5,7 +5,7 @@
 
     <ul v-if="problems.length">
       <li v-for="p in problems" :key="p">
-        <router-link :to="`/problems/${encodeURIComponent(p)}`">
+        <router-link :to="`/problems/${encodeURIComponent(p.replace(/\.pdf$/i, ''))}`">
           {{ p }}
         </router-link>
       </li>

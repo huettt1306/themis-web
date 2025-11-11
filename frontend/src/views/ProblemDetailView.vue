@@ -1,22 +1,25 @@
 <template>
-  <div class="box" v-if="problemName">
-    <h2>{{ problemName }}</h2>
-    <a
-      :href="`${API.PROBLEMS}/${encodeURIComponent(problemName)}`"
-      target="_blank"
-    >
-      Tải file PDF
-    </a>
+  <div class="container" v-if="problemName">
+    <!-- Cột trái: PDF -->
+    <div class="left">
+      <vue-pdf-embed
+        :source="`${API.PROBLEMS}/${encodeURIComponent(problemName)}`"
+        class="pdf-view"
+      />
+    </div>
 
-    <hr />
-    <h3>Nộp bài</h3>
-    <input v-model="student" placeholder="Mã thí sinh" />
-    <input type="file" @change="onFile" />
-    <button @click="submit" :disabled="isSubmitting">Nộp</button>
+    <!-- Cột phải: Form nộp bài -->
+    <div class="right">
+      <h3>Nộp bài</h3>
 
-    <div v-if="filename">Đã gửi: {{ filename }}</div>
-    <pre v-if="log">{{ log }}</pre>
-    <div v-if="isSubmitting">Đang nộp...</div>
+      <p><strong>Mã thí sinh:</strong> {{ student }}</p>
+
+      <input type="file" @change="onFile" />
+      <button @click="submit" :disabled="isSubmitting">Nộp</button>
+
+      <pre v-if="log">{{ log }}</pre>
+      <div v-if="isSubmitting">Đang nộp...</div>
+    </div>
   </div>
 </template>
 
@@ -24,12 +27,13 @@
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
+import VuePdfEmbed from 'vue-pdf-embed'
 import { API, POLL_INTERVAL, POLL_RETRY } from '@/config.js'
 
 const route = useRoute()
 
 const problemName = decodeURIComponent(route.params.filename || '')
-const student = ref(localStorage.getItem('user') || '')
+const student = ref(localStorage.getItem('user') || 'Chưa đăng nhập')
 const file = ref(null)
 const filename = ref('')
 const log = ref('')
@@ -40,8 +44,12 @@ function onFile(e) {
 }
 
 async function submit() {
-  if (!student.value || !file.value) {
-    alert('Nhập mã thí sinh và chọn file.')
+  if (!file.value) {
+    alert('Hãy chọn file cần nộp.')
+    return
+  }
+  if (student.value === 'Chưa đăng nhập') {
+    alert('Bạn chưa đăng nhập.')
     return
   }
 
@@ -71,9 +79,7 @@ async function pollResult(name) {
         isSubmitting.value = false
         return
       }
-    } catch {
-      // bỏ qua lỗi tạm thời
-    }
+    } catch {}
     await new Promise((r) => setTimeout(r, POLL_INTERVAL))
   }
   log.value = 'Hết thời gian chờ. Chưa có log.'
@@ -81,23 +87,62 @@ async function pollResult(name) {
 }
 </script>
 
-<style scoped>
-.box {
-  max-width: 600px;
-  margin: 20px auto;
+<script>
+export default {
+  components: { VuePdfEmbed }
 }
-input {
+</script>
+
+<style scoped>
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 20px;
+}
+
+/* PDF bên trái */
+.left {
+  flex: 7;
+  display: flex;              /* bật flex cho cột trái */
+  justify-content: center;    /* căn giữa ngang */
+  align-items: flex-start;    /* đầu trên (có thể đổi thành center nếu muốn giữa dọc) */
+}
+
+/* Form bên phải */
+.right {
+  flex: 3;
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 6px;
+  background: #fafafa;
+  height: fit-content;
+}
+
+.pdf-view {
+  width: 96%;
+  height: 90vh;
+  border: 1px solid #ccc;
+}
+
+input[type="file"] {
   display: block;
   width: 100%;
   margin: 8px 0;
   padding: 6px;
 }
+
 button {
   padding: 8px 12px;
+  width: 100%;
 }
+
 pre {
   background: #f4f4f4;
   padding: 10px;
   white-space: pre-wrap;
+  max-height: 300px;
+  overflow-y: auto;
 }
 </style>

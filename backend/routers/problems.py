@@ -22,8 +22,13 @@ def list_problems():
 
 @router.get("/{filename}")
 def download_problem(filename: str):
-    """Tải file PDF"""
+    """Tải file PDF — cho phép bỏ phần .pdf trong URL"""
     safe_name = safe_filename(filename)
+
+    # Nếu người dùng không truyền đuôi .pdf → tự thêm vào
+    if not safe_name.lower().endswith(".pdf"):
+        safe_name += ".pdf"
+
     file_path = os.path.join(DOWNLOADS_PATH, safe_name)
 
     if not os.path.exists(file_path):
